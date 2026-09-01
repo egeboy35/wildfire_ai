@@ -11,7 +11,7 @@ import numpy as np
 
 try:
     import rasterio
-    from rasterio.windows import from_bounds
+    from rasterio.windows import Window, from_bounds
     from PIL import Image
     HAS_GIS = True
 except ImportError:
@@ -61,14 +61,32 @@ def crop_bellwether_by_bbox(
         else:
             try:
                 window = from_bounds(c_min_lng, c_min_lat, c_max_lng, c_max_lat, transform=src.transform)
+                # A bbox narrower than one pixel rounds to a zero-length axis.
+                # Widen it to a single pixel so the crop reports the ground it
+                # was asked about rather than an empty read.
+                if window.width < 1 or window.height < 1:
+                    window = Window(
+                        window.col_off,
+                        window.row_off,
+                        max(window.width, 1),
+                        max(window.height, 1),
+                    )
                 data = src.read(1, window=window)
             except Exception:
                 data = src.read(1)
 
     h, w = data.shape
     if h == 0 or w == 0:
-        h, w = 200, 200
-        data = np.zeros((h, w), dtype=np.float32)
+        # Substituting np.zeros here answered with data that was never read:
+        # every pixel classified as Very Low, stats{} reported 40,000 counted
+        # pixels at 100.0%, and max_probability came back 0.0 -- for ground
+        # whose real value could be the highest on the map. The window is now
+        # widened to a pixel above, so this is a genuine internal error rather
+        # than a case to paper over.
+        raise ValueError(
+            f"Empty {h}x{w} read from {tif_path.name} for bbox "
+            f"({c_min_lat}, {c_min_lng}) - ({c_max_lat}, {c_max_lng})."
+        )
 
     rgba = np.zeros((h, w, 4), dtype=np.uint8)
     valid_mask = ~np.isnan(data) & (data >= 0)
