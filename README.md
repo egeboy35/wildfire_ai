@@ -31,6 +31,11 @@ cd frontend
 npm run dev -- -p 3000
 ```
 - Dashboard: [http://localhost:3000](http://localhost:3000)
+- The frontend calls the backend at `http://localhost:8000` by default. If it runs
+  somewhere else, set `NEXT_PUBLIC_API_BASE` before building or starting:
+  ```bash
+  NEXT_PUBLIC_API_BASE=http://192.168.1.20:8000 npm run dev -- -p 3000
+  ```
 
 ---
 

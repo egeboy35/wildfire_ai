@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { BookOpen, X, Layers, Sparkles, Shield, Wind, Home, ExternalLink, CheckCircle2 } from 'lucide-react';
+import { API_BASE } from '@/app/lib/api';
 
 interface DataCatalogModalProps {
   isOpen: boolean;
@@ -13,7 +14,7 @@ export default function DataCatalogModal({ isOpen, onClose }: DataCatalogModalPr
 
   useEffect(() => {
     if (isOpen) {
-      fetch('http://localhost:8000/api/data-catalog')
+      fetch(`${API_BASE}/api/data-catalog`)
         .then((res) => res.json())
         .then((data) => {
           if (data.success && data.catalog) {

@@ -2,12 +2,13 @@
 
 import React, { useEffect, useState } from 'react';
 import { Activity, BarChart2 } from 'lucide-react';
+import { API_BASE } from '@/app/lib/api';
 
 export default function RiskDriversChart() {
   const [factors, setFactors] = useState<any[]>([]);
 
   useEffect(() => {
-    fetch('http://localhost:8000/api/risk-factors')
+    fetch(`${API_BASE}/api/risk-factors`)
       .then((res) => res.json())
       .then((data) => {
         if (data.success && data.factors) {

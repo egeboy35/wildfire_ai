@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import L from 'leaflet';
+import { API_BASE } from '@/app/lib/api';
 
 interface MapViewProps {
   activeLayer: '1yr' | '5yr' | 'none';
@@ -92,12 +93,12 @@ export default function MapView({
     if (activeLayer === 'none') return;
 
     const is5Yr = activeLayer === '5yr';
-    fetch(`http://localhost:8000/api/layers/bellwether?is_5_year=${is5Yr}&region=${selectedRegion}`)
+    fetch(`${API_BASE}/api/layers/bellwether?is_5_year=${is5Yr}&region=${selectedRegion}`)
       .then((res) => res.json())
       .then((data) => {
         if (data.success && data.layer) {
           const { image_url, bounds, stats } = data.layer;
-          const overlayUrl = `http://localhost:8000${image_url}`;
+          const overlayUrl = `${API_BASE}${image_url}`;
           
           const newOverlay = L.imageOverlay(overlayUrl, bounds, {
             opacity: opacity,
@@ -120,7 +121,7 @@ export default function MapView({
     }
     if (!showCalfirePerimeters) return;
 
-    fetch('http://localhost:8000/api/layers/calfire-perimeters')
+    fetch(`${API_BASE}/api/layers/calfire-perimeters`)
       .then((res) => res.json())
       .then((data) => {
         if (data.success && data.perimeters) {
@@ -159,7 +160,7 @@ export default function MapView({
     }
     if (!showFirmsHotspots) return;
 
-    fetch('http://localhost:8000/api/layers/firms-hotspots')
+    fetch(`${API_BASE}/api/layers/firms-hotspots`)
       .then((res) => res.json())
       .then((data) => {
         if (data.success && data.hotspots) {
@@ -201,7 +202,7 @@ export default function MapView({
     }
     if (!showFuelMoisture) return;
 
-    fetch('http://localhost:8000/api/layers/fuel-moisture')
+    fetch(`${API_BASE}/api/layers/fuel-moisture`)
       .then((res) => res.json())
       .then((data) => {
         if (data.success && data.stations) {
@@ -243,12 +244,12 @@ export default function MapView({
     }
     if (!showTerrainSlope) return;
 
-    fetch('http://localhost:8000/api/layers/terrain-slope')
+    fetch(`${API_BASE}/api/layers/terrain-slope`)
       .then((res) => res.json())
       .then((data) => {
         if (data.success && data.layer) {
           const { image_url, bounds } = data.layer;
-          const newOverlay = L.imageOverlay(`http://localhost:8000${image_url}`, bounds, {
+          const newOverlay = L.imageOverlay(`${API_BASE}${image_url}`, bounds, {
             opacity: 0.55,
             interactive: false,
           }).addTo(map);
@@ -268,7 +269,7 @@ export default function MapView({
 
     if (!showBuildings) return;
 
-    fetch('http://localhost:8000/api/layers/buildings')
+    fetch(`${API_BASE}/api/layers/buildings`)
       .then((res) => res.json())
       .then((data) => {
         if (data.success && data.buildings) {
@@ -313,12 +314,12 @@ export default function MapView({
 
     if (!showCalFire) return;
 
-    fetch('http://localhost:8000/api/layers/calfire')
+    fetch(`${API_BASE}/api/layers/calfire`)
       .then((res) => res.json())
       .then((data) => {
         if (data.success && data.layer) {
           const { image_url, bounds } = data.layer;
-          const newOverlay = L.imageOverlay(`http://localhost:8000${image_url}`, bounds, {
+          const newOverlay = L.imageOverlay(`${API_BASE}${image_url}`, bounds, {
             opacity: 0.65,
             interactive: false,
           }).addTo(map);
@@ -362,7 +363,7 @@ export default function MapView({
       const newMarker = L.marker([lat, lng], { icon: fireIcon }).addTo(map);
       setFireMarker(newMarker);
 
-      fetch('http://localhost:8000/api/query-corridor', {
+      fetch(`${API_BASE}/api/query-corridor`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ lat, lng, radius_feet: 130 }),
