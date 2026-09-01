@@ -116,6 +116,9 @@ def crop_bellwether_by_bbox(
         "width": w,
         "height": h,
         "stats": stats,
-        "max_probability": float(np.nanmax(data)) if total_valid > 0 else 0.0,
-        "mean_probability": float(np.nanmean(data)) if total_valid > 0 else 0.0,
+        # valid_mask is what the PNG and every stats{} count are built from;
+        # these two summaries have to be taken over the same pixels or they
+        # describe a different raster than the legend beside them.
+        "max_probability": float(np.nanmax(data[valid_mask])) if total_valid > 0 else 0.0,
+        "mean_probability": float(np.nanmean(data[valid_mask])) if total_valid > 0 else 0.0,
     }
