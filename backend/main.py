@@ -11,7 +11,7 @@ from typing import Optional
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from backend.services import GISDataService, STATIC_DIR
 
@@ -37,9 +37,20 @@ gis_service = GISDataService()
 
 
 class QueryCorridorRequest(BaseModel):
-    lat: float
-    lng: float
-    radius_feet: float = 130.0
+    """Bounds the inputs the corridor maths can actually serve.
+
+    The buffer area is computed as pi * r * r_major with
+    r_major = r * (1 + wind / 20), so a negative radius multiplies two
+    negatives and yields a *positive*, larger area: -500 ft reported 129
+    threatened structures against 8 for the +130 ft default. Constraining
+    radius_feet to be positive removes that branch entirely, and the
+    coordinate ranges stop the endpoint answering for points that are not
+    on Earth.
+    """
+
+    lat: float = Field(..., ge=-90.0, le=90.0)
+    lng: float = Field(..., ge=-180.0, le=180.0)
+    radius_feet: float = Field(130.0, gt=0.0)
 
 
 @app.get("/")
