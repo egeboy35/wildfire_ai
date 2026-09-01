@@ -45,8 +45,16 @@ def run_pipeline():
     print("\n[Step 1] Loading Google X Bellwether Wildfire Hazard GeoTIFFs...")
     parser = BellwetherParser(ref_data_dir)
 
-    prob_1yr, meta_1yr = parser.load_prediction("prediction_for_20260401_to_20270401.tif")
-    prob_5yr, meta_5yr = parser.load_prediction("prediction_for_20260401_to_20310401.tif")
+    try:
+        prob_1yr, meta_1yr = parser.load_prediction("prediction_for_20260401_to_20270401.tif")
+        prob_5yr, meta_5yr = parser.load_prediction("prediction_for_20260401_to_20310401.tif")
+    except FileNotFoundError as exc:
+        # The directory check above passes as soon as ref_data exists, which is
+        # also true of a partial or interrupted download. Report the missing
+        # raster the same way rather than ending on a traceback.
+        print(f"Error: Reference raster not found: {exc}")
+        print(f"       Expected under: {ref_data_dir}")
+        return
 
     print(f"  • 1-Year Prediction Raster: Shape={prob_1yr.shape}, CRS={meta_1yr['crs']}")
     print(f"    - Min Prob: {np.nanmin(prob_1yr):.6f}, Max Prob: {np.nanmax(prob_1yr):.6f}, Mean: {np.nanmean(prob_1yr):.6f}")
