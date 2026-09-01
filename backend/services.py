@@ -232,6 +232,45 @@ class GISDataService:
         except Exception:
             return []
 
+    @staticmethod
+    def _ellipse_geojson(
+        lat: float,
+        lng: float,
+        semi_minor_m: float,
+        semi_major_m: float,
+        bearing_deg: float,
+        vertices: int = 72,
+    ) -> Dict:
+        """Return the priced ellipse as a GeoJSON Polygon in EPSG:4326.
+
+        Metres are converted to degrees locally, which is accurate to well
+        under a metre at the scale of a 130-foot corridor.
+        """
+        m_per_deg_lat = 111_320.0
+        m_per_deg_lng = 111_320.0 * max(np.cos(np.radians(lat)), 1e-6)
+        theta = np.radians(90.0 - bearing_deg)  # compass bearing -> math angle
+        cos_t, sin_t = np.cos(theta), np.sin(theta)
+
+        ring = []
+        for i in range(vertices + 1):
+            a = 2.0 * np.pi * i / vertices
+            # major axis along the bearing, minor axis across it
+            x = semi_major_m * np.cos(a)
+            y = semi_minor_m * np.sin(a)
+            east = x * cos_t - y * sin_t
+            north = x * sin_t + y * cos_t
+            ring.append([lng + east / m_per_deg_lng, lat + north / m_per_deg_lat])
+
+        return {
+            "type": "Feature",
+            "geometry": {"type": "Polygon", "coordinates": [ring]},
+            "properties": {
+                "semi_minor_meters": round(semi_minor_m, 2),
+                "semi_major_meters": round(semi_major_m, 2),
+                "bearing_deg": round(bearing_deg % 360.0, 1),
+            },
+        }
+
     def query_corridor(self, lat: float, lng: float, radius_feet: float = 130.0) -> Dict:
         """Query wind-adjusted 130ft radiant heat corridor and parcel metrics."""
         radius_meters = radius_feet * 0.3048
@@ -249,6 +288,23 @@ class GISDataService:
         total_threatened_usd = total_sqft * 650.0
         saved_usd = total_threatened_usd * 0.85
 
+        # The dollar figures above are priced on an ellipse with semi-axes
+        # radius_meters and major_radius_meters. Emit that same ellipse so the
+        # map can draw what was priced instead of approximating it with a
+        # circle, and so wind_direction_deg is actually used for something.
+        #
+        # wind_direction_deg follows the meteorological convention -- the
+        # direction the wind blows FROM -- so the plume extends toward
+        # (deg + 180). At 225 deg that is the north-east, which matches the
+        # "Southwestern to northeastern winds" driver reported below.
+        corridor_geojson = self._ellipse_geojson(
+            lat=lat,
+            lng=lng,
+            semi_minor_m=radius_meters,
+            semi_major_m=major_radius_meters,
+            bearing_deg=weather["wind_direction_deg"] + 180.0,
+        )
+
         land_cover_types = [
             {"type": "Coastal Chaparral / Dense Scrub", "flammability": "High", "fuel_model": "FM4 (High Load Shrubs)"},
             {"type": "Annual Grassland / Fine Fuels", "flammability": "Extreme (Fast Spread)", "fuel_model": "FM1 (Short Grass)"},
@@ -259,6 +315,7 @@ class GISDataService:
         
         return {
             "center": {"lat": lat, "lng": lng},
+            "corridor_geojson": corridor_geojson,
             "radius_feet": radius_feet,
             "radius_meters": round(radius_meters, 2),
             "wind_adjusted_major_radius_meters": round(major_radius_meters, 2),

@@ -48,7 +48,7 @@ export default function MapView({
   const [perimetersLayer, setPerimetersLayer] = useState<L.GeoJSON | null>(null);
   const [firmsLayer, setFirmsLayer] = useState<L.GeoJSON | null>(null);
   const [fuelMoistureLayer, setFuelMoistureLayer] = useState<L.GeoJSON | null>(null);
-  const [corridorCircle, setCorridorCircle] = useState<L.Circle | null>(null);
+  const [corridorCircle, setCorridorCircle] = useState<L.Layer | null>(null);
   const [fireMarker, setFireMarker] = useState<L.Marker | null>(null);
 
   // Initialize Leaflet Map
@@ -371,18 +371,27 @@ export default function MapView({
         .then((data) => {
           if (data.success && data.data) {
             onSelectLocation(data.data);
-            const majorRadius = data.data.wind_adjusted_major_radius_meters || 39.62;
 
-            const newCircle = L.circle([lat, lng], {
-              radius: majorRadius,
+            const style = {
               color: '#f97316',
               weight: 2,
               fillColor: '#ea580c',
               fillOpacity: 0.35,
               dashArray: '4, 6',
-            }).addTo(map);
+            };
 
-            setCorridorCircle(newCircle);
+            // Draw the geometry the backend priced. It is an ellipse with
+            // semi-axes radius_meters and wind_adjusted_major_radius_meters,
+            // so a circle of the major radius covers 1.81x its area.
+            const corridor = data.data.corridor_geojson;
+            const newCorridor = corridor
+              ? L.geoJSON(corridor, { style }).addTo(map)
+              : L.circle([lat, lng], {
+                  radius: data.data.radius_meters || 39.62,
+                  ...style,
+                }).addTo(map);
+
+            setCorridorCircle(newCorridor);
           }
         })
         .catch((err) => console.error('Failed to query corridor API:', err));
