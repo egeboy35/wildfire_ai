@@ -37,7 +37,7 @@ def crop_bellwether_by_bbox(
         raise RuntimeError("rasterio and PIL packages are required for GIS processing.")
 
     STATIC_DIR.mkdir(parents=True, exist_ok=True)
-    tif_name = "prediction_for_20260401_to_30310401.tif" if is_5_year else "prediction_for_20260401_to_20270401.tif"
+    tif_name = "prediction_for_20260401_to_20310401.tif" if is_5_year else "prediction_for_20260401_to_20270401.tif"
     if not (REF_DATA_DIR / tif_name).exists():
         for file in REF_DATA_DIR.glob("prediction_for_2026*.tif"):
             if ("2031" in file.name and is_5_year) or ("2027" in file.name and not is_5_year):
