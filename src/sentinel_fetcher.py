@@ -115,8 +115,11 @@ class SentinelFetcher:
         self, item_obj
     ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, dict]:
         """
-        Stream Band 4 (Red), Band 8 (NIR), and Band 11 (SWIR) for the target scene
-        and compute NDVI, NDWI, and NBR.
+        Stream Band 4 (Red), Band 8 (NIR), Band 11 (SWIR1) and Band 12 (SWIR2)
+        for the target scene and compute NDVI, NDWI, and NBR.
+
+        NDWI uses SWIR1 (B11); NBR is defined on SWIR2 (B12). Passing B11 to
+        both makes the two indices the same array.
         
         Returns:
             (ndvi, ndwi, nbr, metadata)
@@ -128,23 +131,27 @@ class SentinelFetcher:
         b4_asset = item_obj.assets["B04"].href
         b8_asset = item_obj.assets["B08"].href
         b11_asset = item_obj.assets["B11"].href
+        b12_asset = item_obj.assets["B12"].href
 
         da_b4 = rioxarray.open_rasterio(b4_asset, masked=True)
         da_b8 = rioxarray.open_rasterio(b8_asset, masked=True)
         da_b11 = rioxarray.open_rasterio(b11_asset, masked=True)
+        da_b12 = rioxarray.open_rasterio(b12_asset, masked=True)
 
         # Clip to bounding box
         da_b4_clipped = da_b4.rio.clip_box(*self.bbox)
         da_b8_clipped = da_b8.rio.clip_box(*self.bbox)
         da_b11_clipped = da_b11.rio.clip_box(*self.bbox)
+        da_b12_clipped = da_b12.rio.clip_box(*self.bbox)
 
         red = da_b4_clipped.values[0].astype(np.float32)
         nir = da_b8_clipped.values[0].astype(np.float32)
-        swir = da_b11_clipped.values[0].astype(np.float32)
+        swir1 = da_b11_clipped.values[0].astype(np.float32)
+        swir2 = da_b12_clipped.values[0].astype(np.float32)
 
         ndvi = self.calculate_ndvi(red, nir)
-        ndwi = self.calculate_ndwi(nir, swir)
-        nbr = self.calculate_nbr(nir, swir)
+        ndwi = self.calculate_ndwi(nir, swir1)
+        nbr = self.calculate_nbr(nir, swir2)
 
         metadata = {
             "scene_id": item_obj.id,
