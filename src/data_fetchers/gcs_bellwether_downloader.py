@@ -4,6 +4,7 @@ Downloads or crops Google X Project Bellwether 100m Cloud-Optimized GeoTIFFs (CO
 for any lat/lng bounding box (San Bruno, San Jose, Santa Cruz, etc.).
 """
 
+import hashlib
 import os
 from pathlib import Path
 from typing import Dict, Tuple, Optional
@@ -94,7 +95,16 @@ def crop_bellwether_by_bbox(
         rgba[mask] = color
 
     if not output_filename:
-        output_filename = f"bellwether_crop_{'5yr' if is_5_year else '1yr'}_{abs(hash((min_lat, min_lng))) % 10000}.png"
+        # The name has to identify the whole window, not just its south-west
+        # corner. Two crops that share a corner but differ in extent would
+        # otherwise land on the same file: the second write replaces the first,
+        # and the first caller then renders the second caller's pixels against
+        # its own bounds. Keyed on the clamped bounds so that identical content
+        # always maps to one name, and on a digest rather than hash() so the
+        # name does not depend on the interpreter build.
+        extent_key = f"{c_min_lat:.6f},{c_min_lng:.6f},{c_max_lat:.6f},{c_max_lng:.6f}"
+        extent_id = hashlib.sha256(extent_key.encode("utf-8")).hexdigest()[:12]
+        output_filename = f"bellwether_crop_{'5yr' if is_5_year else '1yr'}_{extent_id}.png"
 
     out_path = STATIC_DIR / output_filename
     img = Image.fromarray(rgba, mode="RGBA")
