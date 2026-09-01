@@ -12,6 +12,12 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Union
 import numpy as np
 
+try:
+    from PIL import Image
+    HAS_PIL = True
+except ImportError:  # Pillow is optional; only the raster overlay endpoints need it
+    HAS_PIL = False
+
 from src.data_fetchers import (
     crop_bellwether_by_bbox,
     get_active_perimeters,
@@ -163,6 +169,14 @@ class GISDataService:
         rgba[dist < 80] = [220, 38, 38, 160]
         rgba[(dist >= 80) & (dist < 120)] = [249, 115, 22, 140]
         rgba[(dist >= 120) & (dist < 160)] = [234, 179, 8, 120]
+
+        if not HAS_PIL:
+            # Report the missing dependency the way the sibling fetcher already
+            # does, instead of letting a NameError surface as an opaque 500.
+            raise RuntimeError(
+                "Pillow is required to render the CAL FIRE FHSZ overlay PNG. "
+                "Install it with: python -m pip install Pillow"
+            )
 
         out_path = STATIC_DIR / "calfire_fhsz_overlay.png"
         img = Image.fromarray(rgba, mode="RGBA")
