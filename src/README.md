@@ -73,9 +73,9 @@ The system ingests, processes, and layers **10 distinct geospatial data sources*
 - **Physical Meaning**: Machine learning probabilistic prediction outputting absolute 1-Year ($P_{\text{1yr}}$) and 5-Year ($P_{\text{5yr}}$) burn probability per 100m pixel. Predictions are probability-calibrated against historical burn perimeters.
 - **How it is used**: Primary hazard overlay mapped into 7 risk scale levels (Very Low to Extreme). Supports dynamic spatial clipping across San Bruno, San Jose, Santa Cruz, and CONUS.
 - **Code Implementation Location**:
-  - Fetcher & BBox Cropper: [`src/data_fetchers/gcs_bellwether_downloader.py`](file:///Developer/wildfire_ai/src/data_fetchers/gcs_bellwether_downloader.py)
-  - Parser & COG Weights Decoder: [`src/bellwether_parser.py`](file:///Developer/wildfire_ai/src/bellwether_parser.py)
-  - API Route: `GET /api/layers/bellwether` in [`backend/main.py`](file:///Developer/wildfire_ai/backend/main.py)
+  - Fetcher & BBox Cropper: [`src/data_fetchers/gcs_bellwether_downloader.py`](../src/data_fetchers/gcs_bellwether_downloader.py)
+  - Parser & COG Weights Decoder: [`src/bellwether_parser.py`](../src/bellwether_parser.py)
+  - API Route: `GET /api/layers/bellwether` in [`backend/main.py`](../backend/main.py)
 
 ### 2. Copernicus Sentinel-2 Satellite Multi-Spectral Imagery
 - **Provider**: European Space Agency (ESA) / Copernicus Program.
@@ -86,8 +86,8 @@ The system ingests, processes, and layers **10 distinct geospatial data sources*
   - **NDWI (Normalized Difference Water Index)**: Measures live fuel moisture content (LFMC) in canopy leaves.
 - **How it is used**: Live multi-spectral STAC satellite layer rendered over WUI wildlands for real-time fuel moisture monitoring.
 - **Code Implementation Location**:
-  - STAC Fetcher & Index Calculator: [`src/sentinel_fetcher.py`](file:///Developer/wildfire_ai/src/sentinel_fetcher.py)
-  - STAC Demo Execution: [`src/stac_demo.py`](file:///Developer/wildfire_ai/src/stac_demo.py)
+  - STAC Fetcher & Index Calculator: [`src/sentinel_fetcher.py`](../src/sentinel_fetcher.py)
+  - STAC Demo Execution: [`src/stac_demo.py`](../src/stac_demo.py)
 
 ### 3. CAL FIRE Active Incidents & NIFC Wildfire Perimeters
 - **Provider**: California Department of Forestry and Fire Protection (CAL FIRE) / National Interagency Fire Center (NIFC).
@@ -96,8 +96,8 @@ The system ingests, processes, and layers **10 distinct geospatial data sources*
 - **Physical Meaning**: Real-time active wildfire perimeters, acres burned, containment percentages (% Containment), and historical burn scars (e.g. CZU Lightning Complex scar).
 - **How it is used**: Renders interactive red/maroon fire perimeter polygons with containment & agency dispatch tooltips.
 - **Code Implementation Location**:
-  - GeoJSON Fetcher: [`src/data_fetchers/calfire_fetcher.py`](file:///Developer/wildfire_ai/src/data_fetchers/calfire_fetcher.py)
-  - API Route: `GET /api/layers/calfire-perimeters` in [`backend/main.py`](file:///Developer/wildfire_ai/backend/main.py)
+  - GeoJSON Fetcher: [`src/data_fetchers/calfire_fetcher.py`](../src/data_fetchers/calfire_fetcher.py)
+  - API Route: `GET /api/layers/calfire-perimeters` in [`backend/main.py`](../backend/main.py)
 
 ### 4. NASA FIRMS Satellite Active Thermal Hotspots
 - **Provider**: NASA Earthdata / Fire Information for Resource Management System (FIRMS).
@@ -106,8 +106,8 @@ The system ingests, processes, and layers **10 distinct geospatial data sources*
 - **Physical Meaning**: Satellite infrared thermal anomaly detections indicating active fire heat hotspots. Reports **Brightness Kelvin** ($K$) and **Fire Radiative Power (FRP in MW)**.
 - **How it is used**: Displays amber thermal hotspot markers updated every 1-3 hours.
 - **Code Implementation Location**:
-  - Thermal Hotspot Fetcher: [`src/data_fetchers/firms_fetcher.py`](file:///Developer/wildfire_ai/src/data_fetchers/firms_fetcher.py)
-  - API Route: `GET /api/layers/firms-hotspots` in [`backend/main.py`](file:///Developer/wildfire_ai/backend/main.py)
+  - Thermal Hotspot Fetcher: [`src/data_fetchers/firms_fetcher.py`](../src/data_fetchers/firms_fetcher.py)
+  - API Route: `GET /api/layers/firms-hotspots` in [`backend/main.py`](../backend/main.py)
 
 ### 5. CDEC / RAWS Station Fuel Moisture (DFM / LFMC)
 - **Provider**: California Data Exchange Center (CDEC) & Remote Automated Weather Stations (RAWS).
@@ -115,8 +115,8 @@ The system ingests, processes, and layers **10 distinct geospatial data sources*
 - **Physical Meaning**: Ground sensor measurements of 10-hour Dead Fuel Moisture ($DFM_{10\text{hr}} \%$), 100-hour DFM, and Live Fuel Moisture Content ($LFMC \%$). Moisture levels below $8\%$ trigger Red Flag Warning alerts.
 - **How it is used**: Renders ground telemetry station pins with Red Flag alert popups.
 - **Code Implementation Location**:
-  - RAWS Moisture Fetcher: [`src/data_fetchers/cdec_raws_fetcher.py`](file:///Developer/wildfire_ai/src/data_fetchers/cdec_raws_fetcher.py)
-  - API Route: `GET /api/layers/fuel-moisture` in [`backend/main.py`](file:///Developer/wildfire_ai/backend/main.py)
+  - RAWS Moisture Fetcher: [`src/data_fetchers/cdec_raws_fetcher.py`](../src/data_fetchers/cdec_raws_fetcher.py)
+  - API Route: `GET /api/layers/fuel-moisture` in [`backend/main.py`](../backend/main.py)
 
 ### 6. USGS 3DEP LiDAR Terrain Elevation & Slope Aspect
 - **Provider**: U.S. Geological Survey (USGS) 3D Elevation Program (3DEP).
@@ -125,8 +125,8 @@ The system ingests, processes, and layers **10 distinct geospatial data sources*
 - **Physical Meaning**: Terrain slope steepness (% grade) and aspect orientation. Steep slopes ($\ge 30\%$ grade) drastically accelerate wildfire spread rate by pre-heating upward vegetation fuels.
 - **How it is used**: Renders transparent slope steepness overlays highlighting extreme rate-of-spread zones.
 - **Code Implementation Location**:
-  - LiDAR Slope Fetcher: [`src/data_fetchers/usgs_elevation_fetcher.py`](file:///Developer/wildfire_ai/src/data_fetchers/usgs_elevation_fetcher.py)
-  - API Route: `GET /api/layers/terrain-slope` in [`backend/main.py`](file:///Developer/wildfire_ai/backend/main.py)
+  - LiDAR Slope Fetcher: [`src/data_fetchers/usgs_elevation_fetcher.py`](../src/data_fetchers/usgs_elevation_fetcher.py)
+  - API Route: `GET /api/layers/terrain-slope` in [`backend/main.py`](../backend/main.py)
 
 ### 7. Microsoft US Building Footprints & OSM / FEMA USA Structures
 - **Provider**: Microsoft Open Data / OpenStreetMap / FEMA DHS USA Structures.
@@ -135,8 +135,8 @@ The system ingests, processes, and layers **10 distinct geospatial data sources*
 - **Physical Meaning**: Polygon footprint geometries of every structure, building area (sq ft), assessed valuation, IBHS roof hardening vulnerability rating, and distance (ft) to nearest municipal fire hydrant.
 - **How it is used**: Renders interactive emerald building footprint polygons on Leaflet map with detailed hover tooltips.
 - **Code Implementation Location**:
-  - GeoJSON Generator: `get_building_footprints_geojson()` in [`backend/services.py`](file:///Developer/wildfire_ai/backend/services.py)
-  - Leaflet Map Renderer: [`frontend/app/components/MapView.tsx`](file:///Developer/wildfire_ai/frontend/app/components/MapView.tsx)
+  - GeoJSON Generator: `get_building_footprints_geojson()` in [`backend/services.py`](../backend/services.py)
+  - Leaflet Map Renderer: [`frontend/app/components/MapView.tsx`](../frontend/app/components/MapView.tsx)
 
 ### 8. CAL FIRE FHSZ (Fire Hazard Severity Zones)
 - **Provider**: CAL FIRE / Verisk FireLine / Zesty.ai.
@@ -144,7 +144,7 @@ The system ingests, processes, and layers **10 distinct geospatial data sources*
 - **Physical Meaning**: State Responsibility Area (SRA) and Local Responsibility Area (LRA) regulatory fire hazard severity classifications (Very High, High, Moderate).
 - **How it is used**: Regulatory fire hazard zone overlay & commercial insurance benchmark.
 - **Code Implementation Location**:
-  - Service Function: `get_calfire_fhsz_overlay()` in [`backend/services.py`](file:///Developer/wildfire_ai/backend/services.py)
+  - Service Function: `get_calfire_fhsz_overlay()` in [`backend/services.py`](../backend/services.py)
 
 ### 9. NOAA HRRR Live Weather & Wind Vector Stream
 - **Provider**: NOAA National Weather Service (NWS) / National Centers for Environmental Prediction (NCEP).
@@ -153,7 +153,7 @@ The system ingests, processes, and layers **10 distinct geospatial data sources*
 - **Physical Meaning**: High-Resolution Rapid Refresh (HRRR) real-time atmospheric model. Reports ambient temperature (°F), relative humidity ($RH\%$), wind speed ($V_{\text{wind}}$ mph), and wind direction cardinal vector (SW 225°).
 - **How it is used**: Dynamically deforms the 130ft radiant heat corridor buffer circle into an elongated wind plume along current wind vectors.
 - **Code Implementation Location**:
-  - HRRR Weather Service: `get_live_weather()` in [`backend/services.py`](file:///Developer/wildfire_ai/backend/services.py)
+  - HRRR Weather Service: `get_live_weather()` in [`backend/services.py`](../backend/services.py)
 
 ### 10. San Mateo & Santa Clara County Assessor Parcels & USDA CDL
 - **Provider**: San Mateo & Santa Clara County Assessor Offices / USDA NASS Cropland Data Layer.
@@ -161,8 +161,8 @@ The system ingests, processes, and layers **10 distinct geospatial data sources*
 - **Physical Meaning**: Assessor APN property records ($650/sq.ft baseline) and USDA 30m cropland EVT vegetation classifications (Chaparral, Annual Grassland, WUI Buffer).
 - **How it is used**: Computes structure valuation, threatened square footage, and land cover flammability grade in the 130ft corridor.
 - **Code Implementation Location**:
-  - Contagion & Valuation Engine: [`src/contagion_corridor.py`](file:///Developer/wildfire_ai/src/contagion_corridor.py)
-  - API Route: `POST /api/query-corridor` in [`backend/main.py`](file:///Developer/wildfire_ai/backend/main.py)
+  - Contagion & Valuation Engine: [`src/contagion_corridor.py`](../src/contagion_corridor.py)
+  - API Route: `POST /api/query-corridor` in [`backend/main.py`](../backend/main.py)
 
 ---
 
@@ -348,7 +348,7 @@ For students pursuing MS/PhD research (targeting top AI/GIS conferences such as 
 - **Validation Protocols & Evaluation Metrics**:
   - **Super-Resolution Image Quality**: PSNR (Peak Signal-to-Noise Ratio), SSIM (Structural Similarity Index), SAM (Spectral Angle Mapper), ERGAS.
   - **Downstream Fire Task Evaluation**: Calculate Intersection over Union (**IoU / mIoU**) and **Precision/Recall** of predicted 10m high-risk masks against actual MTBS 30m burn severity perimeters.
-- **Baseline Reuse**: Use `crop_bellwether_by_bbox()` in [`src/data_fetchers/gcs_bellwether_downloader.py`](file:///Developer/wildfire_ai/src/data_fetchers/gcs_bellwether_downloader.py) as input ground truth for training.
+- **Baseline Reuse**: Use `crop_bellwether_by_bbox()` in [`src/data_fetchers/gcs_bellwether_downloader.py`](../src/data_fetchers/gcs_bellwether_downloader.py) as input ground truth for training.
 
 ---
 
@@ -364,7 +364,7 @@ For students pursuing MS/PhD research (targeting top AI/GIS conferences such as 
   - **Physics-Informed Neural Networks (PINN)** incorporating Rothermel surface spread equations.
 - **Validation Protocols & Evaluation Metrics**:
   - **Next-Day Fire Front Prediction**: Jaccard Index (**IoU**), **Dice Score / F1-Score**, **Sorensen-Dice Coefficient**, and **RMSE** of fire front displacement (meters).
-- **Baseline Reuse**: Extend [`src/contagion_corridor.py`](file:///Developer/wildfire_ai/src/contagion_corridor.py) and building polygon GeoJSON in [`backend/services.py`](file:///Developer/wildfire_ai/backend/services.py).
+- **Baseline Reuse**: Extend [`src/contagion_corridor.py`](../src/contagion_corridor.py) and building polygon GeoJSON in [`backend/services.py`](../backend/services.py).
 
 ---
 
