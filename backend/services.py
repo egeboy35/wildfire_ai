@@ -8,6 +8,7 @@ FEMA USA Structures, San Mateo & Santa Clara County (San Jose) multi-region supp
 """
 
 import json
+import zlib
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Union
 import numpy as np
@@ -254,7 +255,12 @@ class GISDataService:
             {"type": "Annual Grassland / Fine Fuels", "flammability": "Extreme (Fast Spread)", "fuel_model": "FM1 (Short Grass)"},
             {"type": "WUI Residential Buffer Zone", "flammability": "Moderate (Structural)", "fuel_model": "Urban Mixed"},
         ]
-        selected_land_cover = land_cover_types[hash(f"{lat:.3f},{lng:.3f}") % len(land_cover_types)]
+        # zlib.crc32 rather than hash(): Python salts the hash of a str per process
+        # (PYTHONHASHSEED), so hash() would hand the same coordinate a different fuel
+        # model after every server restart while the response still cites CDL/LANDFIRE
+        # as the source. crc32 is stable across processes and releases.
+        _cover_key = f"{lat:.3f},{lng:.3f}".encode()
+        selected_land_cover = land_cover_types[zlib.crc32(_cover_key) % len(land_cover_types)]
         apn_code = f"017-{abs(int(lat*10000))%900+100}-{abs(int(lng*10000))%900+100}"
         
         return {

@@ -1,0 +1,39 @@
+# Runtime dependencies for the Wildfire AI backend and the src/ analysis modules.
+# Derived from the imports actually present in the tree, not from the README prose.
+#
+# Install:  python -m pip install -r requirements.txt
+# Tests:    python -m pip install -r requirements-dev.txt && python -m pytest tests/
+
+# --- API layer (backend/) ---
+fastapi>=0.110
+uvicorn[standard]>=0.27
+pydantic>=2.6
+
+# --- geospatial core ---
+# geopandas pulls in shapely and pyproj; contagion_corridor.py needs pyproj's CRS
+# to tell a projected CRS from a geographic one.
+geopandas>=1.0
+shapely>=2.0
+numpy>=1.26
+
+# --- raster and STAC ingestion (src/data_fetchers/) ---
+# Imported lazily inside try/except in bellwether_parser.py, services.py and
+# gcs_bellwether_downloader.py, so the API starts without them; the Sentinel-2
+# and Bellwether paths need them.
+rasterio>=1.3
+# Pillow renders the CAL FIRE FHSZ and USGS slope overlay PNGs
+# (backend/services.py, src/data_fetchers/usgs_elevation_fetcher.py).
+Pillow>=10.0
+rioxarray>=0.15
+pystac-client>=0.7
+planetary-computer>=1.0
+
+# --- plotting used by the analysis scripts ---
+matplotlib>=3.8
+
+# --- deliberately not pinned here ---
+# src/gee_demo.py imports `ee` (earthengine-api), but it does so inside a
+# try/except that prints an install hint, and Earth Engine additionally needs
+# an authenticated Google account. It is left out so that installing this file
+# does not imply a credentialed service. Install it separately if you need
+# gee_demo.py:  python -m pip install earthengine-api geemap
