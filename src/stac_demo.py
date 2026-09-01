@@ -8,11 +8,22 @@ Microsoft Planetary Computer STAC Demo for San Bruno Wildfire Sentinel-2 Analysi
 """
 
 from pathlib import Path
+import sys
 import matplotlib.pyplot as plt
 import numpy as np
 import planetary_computer
 import pystac_client
 import rioxarray
+
+# The banners below use emoji. On a Windows console running a legacy code page
+# -- still the default -- writing them raises UnicodeEncodeError and the script
+# dies before printing anything useful. Reconfiguring stdout keeps the output as
+# written where the console can show it, and degrades to replacement characters
+# where it cannot, instead of crashing.
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+if hasattr(sys.stderr, "reconfigure"):
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
 
 # Bounding box for San Bruno Wildland-Urban Interface (WUI)
 # [min_lon, min_lat, max_lon, max_lat]
