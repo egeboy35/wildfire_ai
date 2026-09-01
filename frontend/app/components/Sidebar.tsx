@@ -3,6 +3,30 @@
 import React from 'react';
 import { Flame, Layers, Eye, ShieldAlert, Sparkles, MapPin, Shield, Wind, BookOpen, Home, Mountain, Droplet, Radio } from 'lucide-react';
 
+// Probability bands, from the two columns of the 7-Level Wildfire Risk
+// Classification Scale in src/README.md. The colours and the cutoffs the raster
+// is painted with live in src/data_fetchers/gcs_bellwether_downloader.py; these
+// strings are the human-readable form of the same thresholds.
+const RISK_BANDS_1YR = [
+  { name: 'Very Low', range: '< 0.004%', color: '#228B22' },
+  { name: 'Low', range: '0.004% - 0.02%', color: '#90EE90' },
+  { name: 'Moderate', range: '0.02% - 0.10%', color: '#FFFF66' },
+  { name: 'Significant', range: '0.10% - 0.40%', color: '#FFCC00' },
+  { name: 'High', range: '0.40% - 0.67%', color: '#FF8000' },
+  { name: 'Very High', range: '0.67% - 1.33%', color: '#EE2222' },
+  { name: 'Extreme', range: '> 1.33%', color: '#9400D3' },
+];
+
+const RISK_BANDS_5YR = [
+  { name: 'Very Low', range: '< 0.02%', color: '#228B22' },
+  { name: 'Low', range: '0.02% - 0.10%', color: '#90EE90' },
+  { name: 'Moderate', range: '0.10% - 0.50%', color: '#FFFF66' },
+  { name: 'Significant', range: '0.50% - 2.00%', color: '#FFCC00' },
+  { name: 'High', range: '2.00% - 3.33%', color: '#FF8000' },
+  { name: 'Very High', range: '3.33% - 6.67%', color: '#EE2222' },
+  { name: 'Extreme', range: '> 6.67%', color: '#9400D3' },
+];
+
 interface SidebarProps {
   activeLayer: '1yr' | '5yr' | 'none';
   setActiveLayer: (layer: '1yr' | '5yr' | 'none') => void;
@@ -56,15 +80,8 @@ export default function Sidebar({
   layerStats,
   onOpenDataCatalog,
 }: SidebarProps) {
-  const riskCategories = [
-    { name: 'Very Low', range: '< 0.004%', color: '#228B22' },
-    { name: 'Low', range: '0.004% - 0.02%', color: '#90EE90' },
-    { name: 'Moderate', range: '0.02% - 0.10%', color: '#FFFF66' },
-    { name: 'Significant', range: '0.10% - 0.40%', color: '#FFCC00' },
-    { name: 'High', range: '0.40% - 0.67%', color: '#FF8000' },
-    { name: 'Very High', range: '0.67% - 1.33%', color: '#EE2222' },
-    { name: 'Extreme', range: '> 1.33%', color: '#9400D3' },
-  ];
+  const riskCategories =
+    activeLayer === '5yr' ? RISK_BANDS_5YR : RISK_BANDS_1YR;
 
   return (
     <aside className="w-96 glass-panel h-screen flex flex-col z-20 shadow-2xl overflow-y-auto border-r border-slate-800">
